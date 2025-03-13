@@ -51,6 +51,8 @@
         }
         #qrcode {
             margin-top: 20px;
+            display: flex;
+            justify-content: center;
         }
     </style>
 </head>
@@ -86,10 +88,10 @@
             ["Děkujeme za využití našich služeb", ""]
         ];
 
-        // Dynamicky vytvoří 20 řádků formuláře
+        // Dynamicky vytvoří 12 řádků formuláře
         window.onload = function() {
             const tableBody = document.getElementById("tableBody");
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 12; i++) {
                 let row = document.createElement("tr");
                 let labelValue = defaultValues[i] ? defaultValues[i][0] : "";
                 let inputValue = defaultValues[i] ? defaultValues[i][1] : "";
