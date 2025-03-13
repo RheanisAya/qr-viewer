@@ -67,11 +67,18 @@
     <script>
 
         function getTimestampedFilename(extension) {
-    const now = new Date();
-    const datePart = now.toLocaleDateString("cs-CZ").replace(/\./g, "").slice(0, 6); // 250313
-    const timePart = now.toLocaleTimeString("cs-CZ", { hour12: false }).replace(/:/g, ""); // 100536
-    return `stvrzenka_${datePart}_${timePart}.${extension}`;
+            const now = new Date();
+    
+            const year = now.getFullYear(); // 2025
+            const month = String(now.getMonth() + 1).padStart(2, "0"); // 03 (březen)
+            const day = String(now.getDate()).padStart(2, "0"); // 13
+            const hours = String(now.getHours()).padStart(2, "0"); // 11
+            const minutes = String(now.getMinutes()).padStart(2, "0"); // 08
+            const seconds = String(now.getSeconds()).padStart(2, "0"); // 08
+
+            return `stvrzenka_${year}${month}${day}_${hours}${minutes}${seconds}.${extension}`;
         }
+
 
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
