@@ -65,6 +65,14 @@
     <button class="btn" id="saveTxtBtn">Uložit jako TXT</button>
 
     <script>
+
+        function getTimestampedFilename(extension) {
+    const now = new Date();
+    const datePart = now.toLocaleDateString("cs-CZ").replace(/\./g, "").slice(0, 6); // 250313
+    const timePart = now.toLocaleTimeString("cs-CZ", { hour12: false }).replace(/:/g, ""); // 100536
+    return `stvrzenka_${datePart}_${timePart}.${extension}`;
+        }
+
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
             return decodeURIComponent(urlParams.get(name) || "");
@@ -127,7 +135,9 @@
                 }
             };
 
-            pdfMake.createPdf(docDefinition).download("stvrzenka.pdf");
+            //pdfMake.createPdf(docDefinition).download("stvrzenka.pdf");
+            pdfMake.createPdf(docDefinition).download(getTimestampedFilename("pdf"));
+
         });
 
         // 📌 2️⃣ Kopírování do schránky se správnými sloupci
@@ -148,7 +158,8 @@
             const textBlob = new Blob([text], { type: "text/plain" });
             const downloadLink = document.createElement("a");
             downloadLink.href = URL.createObjectURL(textBlob);
-            downloadLink.download = "stvrzenka.txt";
+            //downloadLink.download = "stvrzenka.txt";
+            downloadLink.download = getTimestampedFilename("txt");
             downloadLink.click();
         });
     </script>
