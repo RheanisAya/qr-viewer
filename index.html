@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Text Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,7 +44,7 @@
     
     <div id="content">(čekám na data...)</div>
     
-    <button id="saveBtn">Uložit jako soubor</button>
+    <button id="savePdfBtn">Uložit jako PDF</button>
 
     <script>
         // Načtení textu z URL parametru "?data="
@@ -61,16 +62,20 @@
             document.getElementById("content").innerHTML = "<i>Žádný text nebyl nalezen.</i>";
         }
 
-        // Funkce pro uložení textu do souboru
-        document.getElementById("saveBtn").addEventListener("click", function() {
-            const textBlob = new Blob([data || ""], { type: "text/plain" });
-            const downloadLink = document.createElement("a");
-            downloadLink.href = URL.createObjectURL(textBlob);
-            downloadLink.download = "stvrzenka.txt";
-            downloadLink.click();
+        // Generování PDF souboru
+        document.getElementById("savePdfBtn").addEventListener("click", function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            let formattedText = document.getElementById("content").innerText;
+
+            // Přidání textu do PDF
+            doc.text(formattedText, 10, 10);
+            
+            // Stažení souboru
+            doc.save("stvrzenka.pdf");
         });
     </script>
 
 </body>
 </html>
-
