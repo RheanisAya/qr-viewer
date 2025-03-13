@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Stvrzenka</title>
-    <script src="https://unpkg.com/pdf-lib@1.16.0"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -64,40 +65,6 @@
     <button class="btn" id="saveTxtBtn">Uložit jako TXT</button>
 
     <script>
-        async function generatePdf() {
-            const { PDFDocument, rgb, StandardFonts } = PDFLib;
-            const pdfDoc = await PDFDocument.create();
-            const page = pdfDoc.addPage([500, 700]);
-
-            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-            const { width, height } = page.getSize();
-            
-            let y = height - 50;
-            page.drawText("Stvrzenka", { x: 200, y, size: 18, font, color: rgb(0, 0, 0) });
-            y -= 30;
-
-            let data = document.getElementById("receipt").innerText.split("\n");
-            let lineHeight = 20;
-
-            for (let line of data) {
-                if (line.includes("|")) {
-                    let [label, value] = line.split("|").map(s => s.trim());
-                    page.drawText(label, { x: 50, y, size: 12, font, color: rgb(0, 0, 0) });
-                    page.drawText(value, { x: 300, y, size: 12, font, color: rgb(0, 0, 0) });
-                } else {
-                    page.drawText(line, { x: 200, y, size: 12, font, color: rgb(0, 0, 0) });
-                }
-                y -= lineHeight;
-            }
-
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: "application/pdf" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "stvrzenka.pdf";
-            link.click();
-        }
-
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
             return decodeURIComponent(urlParams.get(name) || "");
@@ -118,15 +85,52 @@
         }
 
         let data = getQueryParam("data");
-        console.log("Získaná data:", data);
+        console.log("Získaná data:", data); 
         if (data) {
             document.getElementById("receipt").innerHTML = parseReceipt(data);
         } else {
             document.getElementById("receipt").innerHTML = "<i>Žádná data nebyla nalezena.</i>";
         }
 
-        document.getElementById("savePdfBtn").addEventListener("click", generatePdf);
+        // 📌 1️⃣ Opravené PDF pomocí `pdfmake`
+        document.getElementById("savePdfBtn").addEventListener("click", function() {
+            let lines = data.split("\n");
+            let tableData = [];
 
+            lines.forEach(line => {
+                if (line.includes("|")) {
+                    let [label, value] = line.split("|").map(s => s.trim());
+                    tableData.push([{ text: label, bold: true }, value]);
+                } else {
+                    tableData.push([{ text: line, colSpan: 2, alignment: "center", bold: true }]);
+                }
+            });
+
+            let docDefinition = {
+                content: [
+                    { text: "Stvrzenka", style: "header", alignment: "center" },
+                    { text: "\n" },
+                    {
+                        table: {
+                            headerRows: 1,
+                            widths: ["*", "*"],
+                            body: [
+                                [{ text: "Položka", style: "tableHeader" }, { text: "Hodnota", style: "tableHeader" }],
+                                ...tableData
+                            ]
+                        }
+                    }
+                ],
+                styles: {
+                    header: { fontSize: 18, bold: true },
+                    tableHeader: { fillColor: "#4CAF50", color: "white", bold: true }
+                }
+            };
+
+            pdfMake.createPdf(docDefinition).download("stvrzenka.pdf");
+        });
+
+        // 📌 2️⃣ Kopírování do schránky se správnými sloupci
         document.getElementById("copyBtn").addEventListener("click", async function() {
             try {
                 let text = document.getElementById("receipt").innerText;
@@ -138,6 +142,7 @@
             }
         });
 
+        // 📌 3️⃣ Uložení jako TXT se správným zarovnáním
         document.getElementById("saveTxtBtn").addEventListener("click", function() {
             let text = document.getElementById("receipt").innerText;
             const textBlob = new Blob([text], { type: "text/plain" });
