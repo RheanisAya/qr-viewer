@@ -108,46 +108,44 @@
         }
 
         // 📌 1️⃣ Opravené PDF pomocí `pdfmake`
-document.getElementById("savePdfBtn").addEventListener("click", function() {
-    let lines = data.split("\n");
-    let tableData = [];
+        document.getElementById("savePdfBtn").addEventListener("click", function() {
+            let lines = data.split("\n");
+            let tableData = [];
 
-    lines.forEach((line, index) => {
-        if (index === 0) {
-            // První řádek bude tučně
-            tableData.push([{ text: line.replace(/\*\*/g, ""), colSpan: 2, alignment: "center", bold: true }]);
-        } else if (line.includes("|")) {
-            let [label, value] = line.split("|").map(s => s.trim());
-            tableData.push([{ text: label, bold: false }, value]); // Normální text
-        } else {
-            tableData.push([{ text: line, colSpan: 2, alignment: "center", bold: false }]);
-        }
-    });
-
-    let docDefinition = {
-        content: [
-            { text: "Stvrzenka", style: "header", alignment: "center" },
-            { text: "\n" },
-            {
-                table: {
-                    headerRows: 1,
-                    widths: ["*", "*"],
-                    body: [
-                        [{ text: "Položka", style: "tableHeader" }, { text: "Hodnota", style: "tableHeader" }],
-                        ...tableData
-                    ]
+            lines.forEach(line => {
+                if (line.includes("|")) {
+                    let [label, value] = line.split("|").map(s => s.trim());
+                    tableData.push([{ text: label, bold: true }, value]);
+                } else {
+                    tableData.push([{ text: line, colSpan: 2, alignment: "center", bold: true }]);
                 }
-            }
-        ],
-        styles: {
-            header: { fontSize: 18, bold: true },
-            tableHeader: { fillColor: "#4CAF50", color: "white", bold: true }
-        }
-    };
+            });
 
-    pdfMake.createPdf(docDefinition).download(getTimestampedFilename("pdf"));
-});
+            let docDefinition = {
+                content: [
+                    { text: "Stvrzenka", style: "header", alignment: "center" },
+                    { text: "\n" },
+                    {
+                        table: {
+                            headerRows: 1,
+                            widths: ["*", "*"],
+                            body: [
+                                [{ text: "Položka", style: "tableHeader" }, { text: "Hodnota", style: "tableHeader" }],
+                                ...tableData
+                            ]
+                        }
+                    }
+                ],
+                styles: {
+                    header: { fontSize: 18, bold: true },
+                    tableHeader: { fillColor: "#4CAF50", color: "white", bold: true }
+                }
+            };
 
+            //pdfMake.createPdf(docDefinition).download("stvrzenka.pdf");
+            pdfMake.createPdf(docDefinition).download(getTimestampedFilename("pdf"));
+
+        });
 
         // 📌 2️⃣ Kopírování do schránky se správnými sloupci
         document.getElementById("copyBtn").addEventListener("click", async function() {
