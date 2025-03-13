@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generátor QR URL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 5px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            margin-top: 20px;
+            font-weight: bold;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generátor QR URL</h1>
+    <label for="title">Titul:</label>
+    <input type="text" id="title" placeholder="Název stvrzenky">
+    
+    <table>
+        <tr>
+            <th>Položka</th>
+            <th>Hodnota</th>
+        </tr>
+        <tbody id="tableBody"></tbody>
+    </table>
+    
+    <button onclick="generateURL()">Generovat URL</button>
+    <p id="output"></p>
+
+    <script>
+        // Dynamicky vytvoří 20 řádků formuláře
+        window.onload = function() {
+            const tableBody = document.getElementById("tableBody");
+            for (let i = 0; i < 20; i++) {
+                let row = document.createElement("tr");
+                row.innerHTML = `
+                    <td><input type="text" class="label" placeholder="Položka"></td>
+                    <td><input type="text" class="value" placeholder="Hodnota"></td>
+                `;
+                tableBody.appendChild(row);
+            }
+        };
+
+        function generateURL() {
+            const title = document.getElementById("title").value.trim();
+            const labels = document.querySelectorAll(".label");
+            const values = document.querySelectorAll(".value");
+            let data = title ? title + "\n" : "";
+            
+            labels.forEach((label, index) => {
+                let labelText = label.value.trim();
+                let valueText = values[index].value.trim();
+                
+                if (labelText && valueText) {
+                    data += labelText + "|" + valueText + "\n";
+                } else if (labelText) {
+                    data += labelText + "\n";
+                }
+            });
+            
+            const encodedData = encodeURIComponent(data);
+            const url = `https://tvoje-stranka.cz/qr-viewer/?data=${encodedData}`;
+            document.getElementById("output").innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+        }
+    </script>
+</body>
+</html>
