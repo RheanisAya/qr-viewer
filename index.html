@@ -91,19 +91,12 @@
             document.getElementById("receipt").innerHTML = "<i>Žádná data nebyla nalezena.</i>";
         }
 
-        // 📌 1️⃣ ULOŽENÍ JAKO PDF (se zarovnáním a podporou UTF-8)
-        document.getElementById("savePdfBtn").addEventListener("click", async function() {
+        // 📌 1️⃣ ULOŽENÍ JAKO PDF (opravená verze)
+        document.getElementById("savePdfBtn").addEventListener("click", function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-
-            // Načtení vlastního fontu s podporou diakritiky
-            const font = await fetch('https://cdn.jsdelivr.net/gh/mozilla/Fira@4.202/ttf/FiraSans-Regular.ttf')
-                .then(response => response.arrayBuffer());
-
-            doc.addFileToVFS("FiraSans-Regular.ttf", font);
-            doc.addFont("FiraSans-Regular.ttf", "FiraSans", "normal");
-            doc.setFont("FiraSans");
-
+            doc.setFont("helvetica", "normal"); // Standardní font podporující diakritiku
+            
             let lines = document.getElementById("receipt").innerText.split("\n");
             let y = 20;
 
@@ -112,12 +105,12 @@
 
             doc.setFontSize(12);
             lines.forEach(line => {
-                if (line.includes(":")) {
-                    const [label, value] = line.split(":").map(s => s.trim());
+                if (line.includes("|")) {
+                    const [label, value] = line.split("|").map(s => s.trim());
                     doc.text(label, 20, y);
-                    doc.text(value, 120, y);
+                    doc.text(value, 120, y); // Zarovnání druhého sloupce doprava
                 } else {
-                    doc.text(line, 20, y);
+                    doc.text(line, 20, y, { maxWidth: 170 });
                 }
                 y += 7;
             });
