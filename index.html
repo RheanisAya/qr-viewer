@@ -11,6 +11,7 @@
             margin: 20px;
             padding: 20px;
             background-color: #f9f9f9;
+            text-align: center;
         }
         #content {
             padding: 15px;
@@ -20,10 +21,11 @@
             max-width: 600px;
             margin: auto;
             word-wrap: break-word;
+            text-align: left;
         }
-        button {
-            display: block;
-            margin: 20px auto;
+        .btn {
+            display: inline-block;
+            margin: 10px;
             padding: 10px 20px;
             font-size: 16px;
             background: #007bff;
@@ -32,7 +34,7 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        button:hover {
+        .btn:hover {
             background: #0056b3;
         }
     </style>
@@ -44,7 +46,9 @@
     
     <div id="content">(čekám na data...)</div>
     
-    <button id="savePdfBtn">Uložit jako PDF</button>
+    <button class="btn" id="savePdfBtn">Uložit jako PDF</button>
+    <button class="btn" id="copyBtn">Kopírovat do schránky</button>
+    <button class="btn" id="saveTxtBtn">Uložit jako TXT</button>
 
     <script>
         // Načtení textu z URL parametru "?data="
@@ -62,18 +66,36 @@
             document.getElementById("content").innerHTML = "<i>Žádný text nebyl nalezen.</i>";
         }
 
-        // Generování PDF souboru
+        // 📌 1️⃣ ULOŽENÍ JAKO PDF
         document.getElementById("savePdfBtn").addEventListener("click", function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
             let formattedText = document.getElementById("content").innerText;
-
-            // Přidání textu do PDF
             doc.text(formattedText, 10, 10);
-            
-            // Stažení souboru
             doc.save("stvrzenka.pdf");
+        });
+
+        // 📌 2️⃣ KOPÍROVÁNÍ DO SCHRÁNKY
+        document.getElementById("copyBtn").addEventListener("click", async function() {
+            try {
+                let text = document.getElementById("content").innerText;
+                await navigator.clipboard.writeText(text);
+                alert("Text byl zkopírován do schránky!");
+            } catch (err) {
+                console.error("Kopírování selhalo", err);
+                alert("Kopírování do schránky není podporováno.");
+            }
+        });
+
+        // 📌 3️⃣ ULOŽENÍ JAKO TXT
+        document.getElementById("saveTxtBtn").addEventListener("click", function() {
+            let text = document.getElementById("content").innerText;
+            const textBlob = new Blob([text], { type: "text/plain" });
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(textBlob);
+            downloadLink.download = "stvrzenka.txt";
+            downloadLink.click();
         });
     </script>
 
