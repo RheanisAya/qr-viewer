@@ -26,6 +26,9 @@
             width: 100%;
             padding: 5px;
         }
+        #title {
+            width: 300px;
+        }
         button {
             margin-top: 10px;
             padding: 10px;
@@ -62,14 +65,30 @@
     <p id="output"></p>
 
     <script>
+        // Výchozí hodnoty pro první řádky
+        const defaultValues = [
+            ["Datum:", "25.01.2025"],
+            ["Čas:", "11:30"],
+            ["Bankomat:", "1234"],
+            ["ID transakce:", "32"],
+            ["Contactless", ""],
+            ["Typ transakce:", "Platba"],
+            ["Číslo karty:", "1234567890123456"],
+            ["Platba celkem:", "10 000 Kč"],
+            ["Dlouhé upozornění, které může obsahovat různý text.", ""],
+            ["Děkujeme za využití našich služeb", ""]
+        ];
+
         // Dynamicky vytvoří 20 řádků formuláře
         window.onload = function() {
             const tableBody = document.getElementById("tableBody");
             for (let i = 0; i < 20; i++) {
                 let row = document.createElement("tr");
+                let labelValue = defaultValues[i] ? defaultValues[i][0] : "";
+                let inputValue = defaultValues[i] ? defaultValues[i][1] : "";
                 row.innerHTML = `
-                    <td><input type="text" class="label" placeholder="Položka"></td>
-                    <td><input type="text" class="value" placeholder="Hodnota"></td>
+                    <td><input type="text" class="label" value="${labelValue}" placeholder="Položka"></td>
+                    <td><input type="text" class="value" value="${inputValue}" placeholder="Hodnota"></td>
                 `;
                 tableBody.appendChild(row);
             }
