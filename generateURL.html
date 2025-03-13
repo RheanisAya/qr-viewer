@@ -27,7 +27,7 @@
             padding: 5px;
         }
         #title {
-            width: 300px;
+            width: 350px;
         }
         button {
             margin-top: 10px;
@@ -45,6 +45,8 @@
             margin-top: 20px;
             font-weight: bold;
             word-break: break-all;
+            cursor: pointer;
+            color: #007bff;
         }
     </style>
 </head>
@@ -62,7 +64,7 @@
     </table>
     
     <button onclick="generateURL()">Generovat URL</button>
-    <p id="output"></p>
+    <p id="output" onclick="copyToClipboard()">Klikněte pro zkopírování URL</p>
 
     <script>
         // Výchozí hodnoty pro první řádky
@@ -113,7 +115,17 @@
             
             const encodedData = encodeURIComponent(data);
             const url = `https://rheanisaya.github.io/qr-viewer/?data=${encodedData}`;
-            document.getElementById("output").innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
+            document.getElementById("output").textContent = url;
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById("output").textContent;
+            navigator.clipboard.writeText(output).then(() => {
+                alert("URL byla zkopírována do schránky!");
+            }).catch(err => {
+                console.error("Chyba při kopírování", err);
+                alert("Nepodařilo se zkopírovat URL.");
+            });
         }
     </script>
 </body>
