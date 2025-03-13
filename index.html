@@ -6,7 +6,6 @@
     <title>QR Stvrzenka</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.30/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -56,8 +55,8 @@
 </head>
 <body>
 
-    <h1>QR Stvrzenka další font</h1>
-    <p>Zde se zobrazí text přenesený přes QR kód:</p>
+    <h1>QR Stvrzenka</h1>
+    <p>Zde se zobrazí text přenesený přes QR kód - oprava doc:</p>
     
     <div id="receipt">(čekám na data...)</div>
     
@@ -94,7 +93,7 @@
         }
 
         // 📌 1️⃣ Opravené PDF s diakritikou a správnými sloupci
-        document.getElementById("savePdfBtn").addEventListener("click", async function() {
+        document.getElementById("savePdfBtn").addEventListener("click", function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
@@ -116,6 +115,7 @@
                 }
             });
 
+            // Správné volání autoTable
             doc.autoTable({
                 startY: 20,
                 head: [["Položka", "Hodnota"]],
