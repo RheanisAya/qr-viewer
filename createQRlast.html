@@ -124,9 +124,13 @@
             const url = `https://rheanisaya.github.io/qr-viewer/?data=${encodedData}`;
             document.getElementById("output").textContent = url;
             
-            // Vygenerování QR kódu
+            // Vygenerování QR kódu větší velikosti
             document.getElementById("qrcode").innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), url);
+            new QRCode(document.getElementById("qrcode"), {
+                text: url,
+                width: 256,
+                height: 256
+            });
         }
 
         function copyToClipboard() {
