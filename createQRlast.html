@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generátor QR URL</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 5px;
+        }
+        #title {
+            width: 300px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            margin-top: 20px;
+            font-weight: bold;
+            word-break: break-all;
+            cursor: pointer;
+            color: #007bff;
+        }
+        #qrcode {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generátor QR URL</h1>
+    <label for="title">Titul:</label>
+    <input type="text" id="title" placeholder="Název stvrzenky">
+    
+    <table>
+        <tr>
+            <th>Položka</th>
+            <th>Hodnota</th>
+        </tr>
+        <tbody id="tableBody"></tbody>
+    </table>
+    
+    <button onclick="generateURL()">Generovat URL</button>
+    <p id="output" onclick="copyToClipboard()">Klikněte pro zkopírování URL</p>
+    <div id="qrcode"></div>
+
+    <script>
+        // Výchozí hodnoty pro první řádky
+        const defaultValues = [
+            ["Datum:", "25.01.2025"],
+            ["Čas:", "11:30"],
+            ["Bankomat:", "1234"],
+            ["ID transakce:", "32"],
+            ["Contactless", ""],
+            ["Typ transakce:", "Platba"],
+            ["Číslo karty:", "1234567890123456"],
+            ["Platba celkem:", "10 000 Kč"],
+            ["Dlouhé upozornění, které může obsahovat různý text.", ""],
+            ["Děkujeme za využití našich služeb", ""]
+        ];
+
+        // Dynamicky vytvoří 20 řádků formuláře
+        window.onload = function() {
+            const tableBody = document.getElementById("tableBody");
+            for (let i = 0; i < 20; i++) {
+                let row = document.createElement("tr");
+                let labelValue = defaultValues[i] ? defaultValues[i][0] : "";
+                let inputValue = defaultValues[i] ? defaultValues[i][1] : "";
+                row.innerHTML = `
+                    <td><input type="text" class="label" value="${labelValue}" placeholder="Položka"></td>
+                    <td><input type="text" class="value" value="${inputValue}" placeholder="Hodnota"></td>
+                `;
+                tableBody.appendChild(row);
+            }
+        };
+
+        function generateURL() {
+            const title = document.getElementById("title").value.trim();
+            const labels = document.querySelectorAll(".label");
+            const values = document.querySelectorAll(".value");
+            let data = title ? title + "\n" : "";
+            
+            labels.forEach((label, index) => {
+                let labelText = label.value.trim();
+                let valueText = values[index].value.trim();
+                
+                if (labelText && valueText) {
+                    data += labelText + "|" + valueText + "\n";
+                } else if (labelText) {
+                    data += labelText + "\n";
+                }
+            });
+            
+            const encodedData = encodeURIComponent(data);
+            const url = `https://rheanisaya.github.io/qr-viewer/?data=${encodedData}`;
+            document.getElementById("output").textContent = url;
+            
+            // Vygenerování QR kódu
+            document.getElementById("qrcode").innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), url);
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById("output").textContent;
+            navigator.clipboard.writeText(output).then(() => {
+                alert("URL byla zkopírována do schránky!");
+            }).catch(err => {
+                console.error("Chyba při kopírování", err);
+                alert("Nepodařilo se zkopírovat URL.");
+            });
+        }
+    </script>
+</body>
+</html>
