@@ -93,11 +93,18 @@
         }
 
         // 📌 1️⃣ Opravené PDF s diakritikou a správnými sloupci
-        document.getElementById("savePdfBtn").addEventListener("click", function() {
+        document.getElementById("savePdfBtn").addEventListener("click", async function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            doc.setFont("times", "normal");
+            // Načtení fontu Roboto (podporuje češtinu)
+            const font = await fetch("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/fonts/Roboto-Regular.ttf")
+                .then(response => response.arrayBuffer());
+
+            doc.addFileToVFS("Roboto-Regular.ttf", font);
+            doc.addFont("Roboto-Regular.ttf", "Roboto", "normal");
+            doc.setFont("Roboto");
+
             doc.setFontSize(14);
             doc.text("Stvrzenka", 105, 10, { align: "center" });
 
@@ -118,7 +125,7 @@
                 head: [["Položka", "Hodnota"]],
                 body: tableData,
                 theme: "grid",
-                styles: { font: "times", fontSize: 12, cellPadding: 4 },
+                styles: { font: "Roboto", fontSize: 12, cellPadding: 4 },
                 columnStyles: { 0: { halign: "left", cellWidth: 80 }, 1: { halign: "right", cellWidth: 80 } },
             });
 
