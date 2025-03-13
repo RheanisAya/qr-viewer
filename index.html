@@ -3,10 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Viewer</title>
+    <title>QR Text Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        #content {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+            word-wrap: break-word;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h1>Funguje to!</h1>
-    <p>Tato stránka bude zobrazovat text z QR kódu.</p>
+
+    <h1>QR Text Viewer</h1>
+    <p>Zde se zobrazí text přenesený přes QR kód:</p>
+    
+    <div id="content">(čekám na data...)</div>
+    
+    <button id="saveBtn">Uložit jako soubor</button>
+
+    <script>
+        // Načtení textu z URL parametru "?data="
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Získání textu a jeho zobrazení
+        let data = getQueryParam("data");
+        if (data) {
+            data = decodeURIComponent(data); // Dekódování URL
+            document.getElementById("content").innerHTML = data; // Aplikování HTML značek
+        } else {
+            document.getElementById("content").innerHTML = "<i>Žádný text nebyl nalezen.</i>";
+        }
+
+        // Funkce pro uložení textu do souboru
+        document.getElementById("saveBtn").addEventListener("click", function() {
+            const textBlob = new Blob([data || ""], { type: "text/plain" });
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(textBlob);
+            downloadLink.download = "stvrzenka.txt";
+            downloadLink.click();
+        });
+    </script>
+
 </body>
 </html>
+
