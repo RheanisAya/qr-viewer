@@ -67,7 +67,7 @@
     <script>
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
-            return decodeURIComponent(urlParams.get(name) || ""); // Oprava diakritiky z URL
+            return urlParams.get(name) ? decodeURIComponent(escape(urlParams.get(name))) : "";
         }
 
         function parseReceipt(text) {
@@ -91,12 +91,12 @@
             document.getElementById("receipt").innerHTML = "<i>Žádná data nebyla nalezena.</i>";
         }
 
-        // 📌 1️⃣ ULOŽENÍ JAKO PDF S OPRAVOU TABULKY A DIKRITIKY
+        // 📌 1️⃣ Opravené PDF s funkčními sloupci a diakritikou
         document.getElementById("savePdfBtn").addEventListener("click", function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            doc.setFont("times", "normal"); // Použití standardního fontu s podporou diakritiky
+            doc.setFont("times", "normal");
             doc.setFontSize(14);
             doc.text("Stvrzenka", 105, 10, { align: "center" });
 
@@ -106,7 +106,7 @@
             lines.forEach(line => {
                 if (line.includes("|")) {
                     let [label, value] = line.split("|").map(s => s.trim());
-                    tableData.push([label, value]); // Ujistíme se, že jsou dva sloupce
+                    tableData.push([label, value]);
                 } else {
                     tableData.push([{ content: line, colSpan: 2, styles: { fontStyle: "bold", halign: "center" } }]);
                 }
@@ -124,10 +124,11 @@
             doc.save("stvrzenka.pdf");
         });
 
-        // 📌 2️⃣ KOPÍROVÁNÍ DO SCHRÁNKY
+        // 📌 2️⃣ Kopírování do schránky se správnými sloupci
         document.getElementById("copyBtn").addEventListener("click", async function() {
             try {
-                let text = document.getElementById("receipt").innerText;
+                let lines = document.getElementById("receipt").innerText.split("\n");
+                let text = lines.map(line => line.includes("|") ? line.replace("|", "\t") : line).join("\n");
                 await navigator.clipboard.writeText(text);
                 alert("Text byl zkopírován do schránky!");
             } catch (err) {
@@ -136,9 +137,10 @@
             }
         });
 
-        // 📌 3️⃣ ULOŽENÍ JAKO TXT
+        // 📌 3️⃣ Uložení jako TXT se správným zarovnáním
         document.getElementById("saveTxtBtn").addEventListener("click", function() {
-            let text = document.getElementById("receipt").innerText;
+            let lines = document.getElementById("receipt").innerText.split("\n");
+            let text = lines.map(line => line.includes("|") ? line.replace("|", "\t") : line).join("\n");
             const textBlob = new Blob([text], { type: "text/plain" });
             const downloadLink = document.createElement("a");
             downloadLink.href = URL.createObjectURL(textBlob);
