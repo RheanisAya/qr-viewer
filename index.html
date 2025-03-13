@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Stvrzenka</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.30/jspdf.plugin.autotable.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -91,28 +92,35 @@
             document.getElementById("receipt").innerHTML = "<i>Žádná data nebyla nalezena.</i>";
         }
 
-        // 📌 1️⃣ ULOŽENÍ JAKO PDF (opravená verze)
+        // 📌 1️⃣ ULOŽENÍ JAKO PDF S TABULKOU
         document.getElementById("savePdfBtn").addEventListener("click", function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.setFont("helvetica", "normal"); // Standardní font podporující diakritiku
-            
-            let lines = document.getElementById("receipt").innerText.split("\n");
-            let y = 20;
 
+            doc.setFont("helvetica", "normal"); // Standardní font podporující diakritiku
             doc.setFontSize(14);
             doc.text("Stvrzenka", 105, 10, { align: "center" });
 
-            doc.setFontSize(12);
+            let lines = document.getElementById("receipt").innerText.split("\n");
+
+            let tableData = [];
+
             lines.forEach(line => {
                 if (line.includes("|")) {
                     const [label, value] = line.split("|").map(s => s.trim());
-                    doc.text(label, 20, y);
-                    doc.text(value, 120, y); // Zarovnání druhého sloupce doprava
+                    tableData.push([label, value]); // Přidání dvou sloupců do tabulky
                 } else {
-                    doc.text(line, 20, y, { maxWidth: 170 });
+                    tableData.push([{ content: line, colSpan: 2, styles: { fontStyle: "bold", halign: "center" } }]);
                 }
-                y += 7;
+            });
+
+            doc.autoTable({
+                startY: 20,
+                head: [["Položka", "Hodnota"]],
+                body: tableData,
+                theme: "grid",
+                styles: { font: "helvetica", fontSize: 12, cellPadding: 4 },
+                columnStyles: { 0: { halign: "left" }, 1: { halign: "right" } },
             });
 
             doc.save("stvrzenka.pdf");
