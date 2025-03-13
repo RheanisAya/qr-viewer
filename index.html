@@ -70,6 +70,10 @@
             return urlParams.get(name);
         }
 
+        function removeDiacritics(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Odstranění diakritiky
+        }
+
         function parseReceipt(text) {
             const lines = text.split("\n");
             let html = "";
@@ -92,12 +96,12 @@
             document.getElementById("receipt").innerHTML = "<i>Žádná data nebyla nalezena.</i>";
         }
 
-        // 📌 1️⃣ ULOŽENÍ JAKO PDF S PODPOROU DIKRITIKY
+        // 📌 1️⃣ ULOŽENÍ JAKO PDF S OPRAVENOU DIKRITIKOU A DVĚMA SLOUPCI
         document.getElementById("savePdfBtn").addEventListener("click", function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
 
-            doc.setFont("times", "normal"); // Použití standardního fontu s podporou diakritiky
+            doc.setFont("times", "normal"); // Použití standardního fontu
             doc.setFontSize(14);
             doc.text("Stvrzenka", 105, 10, { align: "center" });
 
@@ -106,10 +110,12 @@
             let tableData = [];
             lines.forEach(line => {
                 if (line.includes("|")) {
-                    const [label, value] = line.split("|").map(s => s.trim());
-                    tableData.push([label, value]); // Přidání dvou sloupců do tabulky
+                    let [label, value] = line.split("|").map(s => s.trim());
+                    label = removeDiacritics(label); // Odstranění diakritiky
+                    value = removeDiacritics(value);
+                    tableData.push([label, value]); // Dva sloupce
                 } else {
-                    tableData.push([{ content: line, colSpan: 2, styles: { fontStyle: "bold", halign: "center" } }]);
+                    tableData.push([{ content: removeDiacritics(line), colSpan: 2, styles: { fontStyle: "bold", halign: "center" } }]);
                 }
             });
 
@@ -140,6 +146,7 @@
         // 📌 3️⃣ ULOŽENÍ JAKO TXT
         document.getElementById("saveTxtBtn").addEventListener("click", function() {
             let text = document.getElementById("receipt").innerText;
+            text = removeDiacritics(text); // Odstranění diakritiky před uložením
             const textBlob = new Blob([text], { type: "text/plain" });
             const downloadLink = document.createElement("a");
             downloadLink.href = URL.createObjectURL(textBlob);
