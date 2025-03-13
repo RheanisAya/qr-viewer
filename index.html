@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Text Viewer</title>
+    <title>QR Stvrzenka</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
@@ -13,15 +13,28 @@
             background-color: #f9f9f9;
             text-align: center;
         }
-        #content {
+        #receipt {
             padding: 15px;
             background: white;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            max-width: 400px;
             margin: auto;
-            word-wrap: break-word;
             text-align: left;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+            padding: 5px 0;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .separator {
+            text-align: center;
+            font-weight: bold;
+            padding: 5px 0;
         }
         .btn {
             display: inline-block;
@@ -41,45 +54,64 @@
 </head>
 <body>
 
-    <h1>QR Text Viewer</h1>
+    <h1>QR Stvrzenka</h1>
     <p>Zde se zobrazí text přenesený přes QR kód:</p>
     
-    <div id="content">(čekám na data...)</div>
+    <div id="receipt">(čekám na data...)</div>
     
     <button class="btn" id="savePdfBtn">Uložit jako PDF</button>
     <button class="btn" id="copyBtn">Kopírovat do schránky</button>
     <button class="btn" id="saveTxtBtn">Uložit jako TXT</button>
 
     <script>
-        // Načtení textu z URL parametru "?data="
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(name);
         }
 
-        // Získání textu a jeho zobrazení
+        // Převod textu na strukturovaný výstup
+        function parseReceipt(text) {
+            const lines = text.split("\n");
+            let html = "";
+            lines.forEach(line => {
+                if (line.includes("|")) { // Dvousloupcová položka
+                    const [label, value] = line.split("|").map(s => s.trim());
+                    html += `<div class="row"><span class="label">${label}</span><span>${value}</span></div>`;
+                } else { // Jednořádková položka (např. nadpis)
+                    html += `<div class="separator">${line}</div>`;
+                }
+            });
+            return html;
+        }
+
+        // Načtení dat z URL
         let data = getQueryParam("data");
         if (data) {
             data = decodeURIComponent(data); // Dekódování URL
-            document.getElementById("content").innerHTML = data; // Aplikování HTML značek
+            document.getElementById("receipt").innerHTML = parseReceipt(data);
         } else {
-            document.getElementById("content").innerHTML = "<i>Žádný text nebyl nalezen.</i>";
+            document.getElementById("receipt").innerHTML = "<i>Žádná data nebyla nalezena.</i>";
         }
 
         // 📌 1️⃣ ULOŽENÍ JAKO PDF
         document.getElementById("savePdfBtn").addEventListener("click", function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
-            let formattedText = document.getElementById("content").innerText;
-            doc.text(formattedText, 10, 10);
+            let lines = document.getElementById("receipt").innerText.split("\n");
+            let y = 10;
+
+            lines.forEach(line => {
+                doc.text(line, 10, y);
+                y += 7;
+            });
+
             doc.save("stvrzenka.pdf");
         });
 
         // 📌 2️⃣ KOPÍROVÁNÍ DO SCHRÁNKY
         document.getElementById("copyBtn").addEventListener("click", async function() {
             try {
-                let text = document.getElementById("content").innerText;
+                let text = document.getElementById("receipt").innerText;
                 await navigator.clipboard.writeText(text);
                 alert("Text byl zkopírován do schránky!");
             } catch (err) {
@@ -90,7 +122,7 @@
 
         // 📌 3️⃣ ULOŽENÍ JAKO TXT
         document.getElementById("saveTxtBtn").addEventListener("click", function() {
-            let text = document.getElementById("content").innerText;
+            let text = document.getElementById("receipt").innerText;
             const textBlob = new Blob([text], { type: "text/plain" });
             const downloadLink = document.createElement("a");
             downloadLink.href = URL.createObjectURL(textBlob);
